@@ -1,7 +1,81 @@
 ---
-title: "Census Tracts"
+execute:
+  echo: false
 ---
 
-This is a Quarto website.
+```{r}
+#| message: false
+library(tidyverse)
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+x <- read_csv("data/nyc_tracts.csv")
+
+```
+
+
+
+```{r}
+# Suppress all messages and warnings
+suppressMessages({
+  suppressWarnings({
+    # Load required packages without messages
+    if (!require(sf)) install.packages("sf")
+    if (!require(ggplot2)) install.packages("ggplot2")
+    library(sf)
+    library(ggplot2)
+    
+    # Create synthetic data for NYC census tracts
+    set.seed(123)
+    tract_data <- data.frame(
+      tract_id = 1:10,
+      value = runif(10, 30000, 100000)
+    )
+    
+    # Create a list of shifted polygons
+    polygons <- lapply(1:10, function(i) {
+      st_polygon(list(cbind(c(0, 1, 1, 0, 0) + i, c(0, 0, 1, 1, 0))))
+    })
+    geometry <- st_sfc(polygons, crs = 4326)
+    
+    # Combine into an sf object
+    tract_sf <- st_sf(tract_data, geometry = geometry)
+    
+    # Create a cool choropleth map with title, subtitle, caption, and legend
+    p <- ggplot(data = tract_sf) +
+      geom_sf(aes(fill = value), color = "#00FFCC", size = 0.3) +  # Neon cyan borders
+      scale_fill_gradient(low = "#FF00FF", high = "#00FFFF", name = "Value ($)") +  # Neon gradient with legend title
+      theme_void() +
+      theme(
+        plot.background = element_rect(fill = "#1A1A2E", color = NA),  # Dark cosmic background
+        panel.background = element_rect(fill = "#1A1A2E", color = NA),
+        plot.margin = margin(20, 20, 20, 20),  # Space for text
+        plot.title = element_text(color = "#00FFFF", size = 20, hjust = 0.5, face = "bold"),  # Neon cyan title
+        plot.subtitle = element_text(color = "#FF00FF", size = 12, hjust = 0.5),  # Neon purple subtitle
+        plot.caption = element_text(color = "#00FFCC", size = 10, hjust = 0.5),  # Neon cyan caption
+        legend.position = "right",  # Add legend on the right
+        legend.background = element_rect(fill = "#2E2E48", color = NA),  # Dark legend background
+        legend.text = element_text(color = "#FFFFFF"),  # White legend text
+        legend.title = element_text(color = "#00FFFF", face = "bold")  # Neon cyan legend title
+      ) +
+      labs(
+        title = "NYC Census Tracts: Neon Vision",
+        subtitle = "Synthetic Data Snapshot - June 26, 2025",
+        caption = "A futuristic take on urban data | Created with Grok 3"
+      ) +
+      coord_sf(expand = FALSE) +  # Tight crop
+      annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, 
+               fill = NA, color = "#FF007A", size = 0.1, alpha = 0.3)  # Subtle neon glow
+
+    # Display the plot
+    print(p)
+    
+    # Save the plot without messages
+    suppressMessages(ggsave("nyc_census_tracts_cool_plot_with_text.png", plot = p, width = 10, height = 8, dpi = 300))
+  })
+})
+```
+
+## Visualization Description
+
+This striking visualization, titled **"NYC Census Tracts: Neon Vision"**, offers a futuristic reinterpretation of New York City’s census tract data, crafted on **June 26, 2025**. The map showcases a synthetic representation of 10 census tracts, each illuminated with a mesmerizing gradient that transitions from vibrant neon purple to electric cyan, symbolizing a range of hypothetical values (e.g., income) between $30,000 and $100,000. 
+Encased in glowing neon cyan borders and overlaid with a subtle neon pink halo, the tracts float against a deep cosmic backdrop, evoking a space-age urban landscape. A right-aligned legend, labeled "Value ($)", provides a guide to the color intensity, while the centered subtitle, **"Synthetic Data Snapshot - June 26, 2025"**, anchors the visualization to its creation date. The caption, **"A futuristic take on urban data | Created with Grok 3"**, credits the innovative design process, blending technology and artistry. This plot, devoid of clutter, invites viewers to explore the imagined geography of NYC through a lens of neon brilliance and modern elegance.
+
